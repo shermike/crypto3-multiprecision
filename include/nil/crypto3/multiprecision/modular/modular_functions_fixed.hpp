@@ -426,22 +426,32 @@ namespace nil {
                         } else
 #endif
 #endif
+#ifdef __EVM__
+                        // The algorithm doesn't work when m_mod is a fixed number(i.e. w/o limbs), as it in the EVM.
+                        Backend_doubled_padded_limbs mod(m_mod.backend());
+                        // In EVM limb_bits is equal to 256, that is wrong fot this algorithm. Should be 128.
+                        constexpr unsigned local_limb_bits = sizeof(limb_type) * CHAR_BIT;
+#else
+                        auto &mod = m_mod.backend();
+                        constexpr unsigned local_limb_bits = limb_bits;
+#endif
                         {
-                            for (auto i = 0; i < m_mod.backend().size(); ++i) {
-                                eval_multiply(prod, m_mod.backend(),
+                            auto sz = m_mod.backend().size();
+                            for (auto i = 0; i < mod.size(); ++i) {
+                                eval_multiply(prod, mod,
                                               static_cast<double_limb_type>(static_cast<internal_limb_type>(
                                                   custom_get_limb_value<internal_limb_type>(accum, i) *
                                                   /// to prevent overflow error in constexpr
                                                   static_cast<double_limb_type>(m_montgomery_p_dash))));
-                                eval_left_shift(prod, i * limb_bits);
+                                eval_left_shift(prod, i * local_limb_bits);
                                 eval_add(accum, prod);
                             }
-                            custom_right_shift(accum, m_mod.backend().size() * limb_bits);
-                            if (!eval_lt(accum, m_mod.backend())) {
-                                eval_subtract(accum, m_mod.backend());
+                            custom_right_shift(accum, mod.size() * local_limb_bits);
+                            if (!eval_lt(accum, mod)) {
+                                eval_subtract(accum, mod);
                             }
-                            if (m_mod.backend().size() < accum.size()) {
-                                accum.resize(m_mod.backend().size(), m_mod.backend().size());
+                            if (mod.size() < accum.size()) {
+                                accum.resize(mod.size(), mod.size());
                             }
                             result = accum;
                         }
