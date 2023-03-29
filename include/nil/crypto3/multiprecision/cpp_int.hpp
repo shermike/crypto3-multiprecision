@@ -1682,13 +1682,13 @@ namespace nil {
                     template<class Arg, typename std::enable_if_t<std::is_integral<Arg>::value &&
                                                                   std::is_convertible<Arg, signed_limb_type>::value &&
                                                                   std::is_signed<Arg>::value> const * = nullptr>
-                    BOOST_MP_FORCEINLINE constexpr cpp_int_backend(Arg i) : base_type((signed_limb_type)i) {
+                    BOOST_MP_FORCEINLINE constexpr cpp_int_backend(Arg i) : base_type(i) {
                     }
 
                     template<class Arg, typename std::enable_if_t<std::is_integral<Arg>::value &&
                                                                   std::is_convertible<Arg, limb_type>::value &&
                                                                   !std::is_signed<Arg>::value> const * = nullptr>
-                    BOOST_MP_FORCEINLINE constexpr cpp_int_backend(Arg i) : base_type((limb_type)i) {
+                    BOOST_MP_FORCEINLINE constexpr cpp_int_backend(Arg i) : base_type(i) {
                     }
 #else
                     template<class Arg>
